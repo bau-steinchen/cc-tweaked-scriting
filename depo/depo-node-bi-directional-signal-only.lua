@@ -1,7 +1,5 @@
--- Signal and station node with accepting broadcasts
-
-local signalName = "Create_Signal_4"
-local sender = "computer_14"
+-- Signal node with accepting broadcasts
+local sender = "computer_20"
 
 -- Helper function: compare tables
 local function tablesEqual(t1, t2)
@@ -20,23 +18,28 @@ local function tablesEqual(t1, t2)
 end
 
 -- Signal
-local signal = peripheral.wrap(signalName)
+local signal = peripheral.wrap("top")
 
 local modem = peripheral.wrap("bottom")
 rednet.open(peripheral.getName(modem))
 
 local lastData = {signal = {}}
 
+local lastMessage = nil
+
 while true do
     -- REDNET CHECK (non-blocking, 0.1 Sec. Timeout)
-    local event, id, message = os.pullEventRaw("rednet_message")
-    if type(message) == "table" then
-        if message.receiver == sender or message.receiver == "ALL" then
-            -- and event for this computer occured
-            if message.signal == "RED" then
-                signal.setForcedRed(true)
-            else 
-                signal.setForcedRed(false)
+    local id, message = rednet.receive(0.6)
+    if message then
+        if type(message) == "table" then
+            if message.receiver == sender or message.receiver == "ALL" then
+                lastMessage = message
+                -- and event for this computer occured
+                if message.signal == "RED" then
+                    signal.setForcedRed(true)
+                else 
+                    signal.setForcedRed(false)
+                end
             end
         end
     end
@@ -69,7 +72,7 @@ while true do
         term.setCursorPos(1,1)
         print("=== MONITOR ===")
         print("Signal State: " .. tostring(currentData.signal.state))
+        print("Rednet letzte Msg: " .. tostring(lastMessage))
     end
-    
-    sleep(1)
+    sleep(0.3)
 end

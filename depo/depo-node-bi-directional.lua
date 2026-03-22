@@ -37,18 +37,23 @@ rednet.open(peripheral.getName(modem))
 
 local lastData = {signal = {}, station = {}}
 
+local lastMessage = nil
+
 while true do
     -- REDNET CHECK (non-blocking, 0.1 Sec. Timeout)
-    local event, id, message = os.pullEventRaw("rednet_message")
-    if type(message) == "table" then
-        if message.receiver == sender or message.receiver == "ALL" then
-            -- and event for this computer occured
-            if message.signal == "RED" then
-                signal.setForcedRed(true)
-            else 
-                signal.setForcedRed(false)
+    local id, message = rednet.receive(0.6)
+    if message then
+        if type(message) == "table" then
+            if message.receiver == sender or message.receiver == "ALL" then
+                -- and event for this computer occured
+                if message.signal == "RED" then
+                    signal.setForcedRed(true)
+                else 
+                    signal.setForcedRed(false)
+                end
             end
         end
+        lastMessage = message
     end
 
     -- SIGNAL CHECK (periodic)
@@ -89,6 +94,7 @@ while true do
         print("Signal State: " .. tostring(currentData.signal.state))
         print("Station: " .. currentData.station.name)
         print("Train: " .. tostring(currentData.station.trainPresent) .. " (" .. currentData.station.trainName .. ")")
+        print("Rednet letzte Msg: " .. tostring(lastMessage))
     end
     
     sleep(1)
