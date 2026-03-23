@@ -1,5 +1,9 @@
 -- Signal node with accepting broadcasts
 local sender = "computer_20"
+-- Signal
+local signal = peripheral.wrap("top")
+-- Chain signal ?
+local chain = "false"
 
 -- Helper function: compare tables
 local function tablesEqual(t1, t2)
@@ -17,8 +21,10 @@ local function tablesEqual(t1, t2)
     return true
 end
 
--- Signal
-local signal = peripheral.wrap("top")
+-- check if chain signal
+if chain == "true" then
+    signal.setSignalType("CROSS_SIGNAL")
+end
 
 local modem = peripheral.wrap("bottom")
 rednet.open(peripheral.getName(modem))
@@ -26,10 +32,11 @@ rednet.open(peripheral.getName(modem))
 local lastData = {signal = {}}
 
 local lastMessage = {sender="none"}
+local lastSend = "None"
 
 while true do
-    -- REDNET CHECK (non-blocking, 0.6 Sec. Timeout)
-    local id, message = rednet.receive(0.6)
+    -- REDNET CHECK (non-blocking, 0.7 Sec. Timeout)
+    local id, message = rednet.receive(0.7)
     if message then
         if type(message) == "table" then
             if message.receiver == sender or message.receiver == "ALL" then
@@ -64,8 +71,10 @@ while true do
     end
     
     if changed then
-        rednet.broadcast(textutils.serialize(currentData))
+        rednet.broadcast(currentData)
+        lastSend = tostring(lastData.signal.state)
         lastData = currentData
+        
 
         -- Optional: Terminal-Status
         term.clear()
@@ -73,6 +82,7 @@ while true do
         print("=== MONITOR ===")
         print("Signal State: " .. tostring(currentData.signal.state))
         print("Rednet letzte Msg: " .. tostring(lastMessage.sender))
+        print("Changes signal from: " .. lastSend)
     end
-    sleep(0.3)
+    sleep(0.2)
 end
