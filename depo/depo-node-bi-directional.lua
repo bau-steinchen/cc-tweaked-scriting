@@ -40,11 +40,13 @@ local lastData = {signal = {}, station = {}}
 local lastMessage = nil
 
 while true do
-    -- REDNET CHECK (non-blocking, 0.1 Sec. Timeout)
-    local id, message = rednet.receive(0.6)
+    -- REDNET CHECK (non-blocking, 0.6 Sec. Timeout)
+    local id, message = rednet.receive(0.8)
     if message then
         if type(message) == "table" then
             if message.receiver == sender or message.receiver == "ALL" then
+                lastMessage = message
+                print("Receivec message: " .. tostring(lastMessage.sender), tostring(lastMessage.signal))
                 -- and event for this computer occured
                 if message.signal == "RED" then
                     signal.setForcedRed(true)
@@ -53,10 +55,9 @@ while true do
                 end
             end
         end
-        lastMessage = message
     end
 
-    -- SIGNAL CHECK (periodic)
+    -- -- SIGNAL CHECK (periodic)
     local currentData = {
         sender = sender,
         signal = {
@@ -96,6 +97,5 @@ while true do
         print("Train: " .. tostring(currentData.station.trainPresent) .. " (" .. currentData.station.trainName .. ")")
         print("Rednet letzte Msg: " .. tostring(lastMessage))
     end
-    
-    sleep(1)
+    sleep(0.1)
 end

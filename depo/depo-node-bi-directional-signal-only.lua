@@ -25,10 +25,10 @@ rednet.open(peripheral.getName(modem))
 
 local lastData = {signal = {}}
 
-local lastMessage = nil
+local lastMessage = {sender="none"}
 
 while true do
-    -- REDNET CHECK (non-blocking, 0.1 Sec. Timeout)
+    -- REDNET CHECK (non-blocking, 0.6 Sec. Timeout)
     local id, message = rednet.receive(0.6)
     if message then
         if type(message) == "table" then
@@ -72,7 +72,7 @@ while true do
         term.setCursorPos(1,1)
         print("=== MONITOR ===")
         print("Signal State: " .. tostring(currentData.signal.state))
-        print("Rednet letzte Msg: " .. tostring(lastMessage))
+        print("Rednet letzte Msg: " .. tostring(lastMessage.sender))
     end
     sleep(0.3)
 end
