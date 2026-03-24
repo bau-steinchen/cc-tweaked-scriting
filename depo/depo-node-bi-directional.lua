@@ -37,11 +37,12 @@ rednet.open(peripheral.getName(modem))
 
 local lastData = {signal = {}, station = {}}
 
-local lastMessage = nil
+local lastMessage = {sender="none"}
+local lastSend = "None"
 
 while true do
-    -- REDNET CHECK (non-blocking, 0.6 Sec. Timeout)
-    local id, message = rednet.receive(0.8)
+    -- REDNET CHECK (non-blocking, 0.7 Sec. Timeout)
+    local id, message = rednet.receive(0.7)
     if message then
         if type(message) == "table" then
             if message.receiver == sender or message.receiver == "ALL" then
@@ -85,7 +86,8 @@ while true do
     end
     
     if changed then
-        rednet.broadcast(textutils.serialize(currentData))
+        rednet.broadcast(currentData)
+        lastSend = tostring(lastData.signal.state)
         lastData = currentData
 
         -- Optional: Terminal-Status
@@ -95,7 +97,8 @@ while true do
         print("Signal State: " .. tostring(currentData.signal.state))
         print("Station: " .. currentData.station.name)
         print("Train: " .. tostring(currentData.station.trainPresent) .. " (" .. currentData.station.trainName .. ")")
-        print("Rednet letzte Msg: " .. tostring(lastMessage))
+        print("Rednet letzte Msg: " .. tostring(lastMessage.sender))
+        print("Changes signal from: " .. lastSend)
     end
     sleep(0.1)
 end

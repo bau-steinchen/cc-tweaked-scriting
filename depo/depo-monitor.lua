@@ -11,18 +11,18 @@ mon.clear()
 -------------------------------------------------
 
 local Nodes = {
-    Checkpoint  = { row = 13, textX = 38,  name = "computer_14", text="Checkpoint", type="Station", signal="Create_Signal_4", offset= 12},
-    depo1       = { row = 12, textX = 45,  name = "computer_13", text="Depo",       type="Station", signal="Create_Signal_5", offset= 6},
-    depo2       = { row = 11, textX = 45,  name = "computer_12", text="Depo",       type="Station", signal="Create_Signal_6", offset= 6},
-    depo3       = { row = 10, textX = 45,  name = "computer_11", text="Depo",       type="Station", signal="Create_Signal_7", offset= 6},
-    depo4       = { row = 9 , textX = 45,  name = "computer_10", text="Depo",       type="Station", signal="Create_Signal_8", offset= 6},
-    depo5       = { row = 8 , textX = 45,  name = "computer_9" , text="Depo",       type="Station", signal="Create_Signal_9", offset= 6},
-    depo6       = { row = 7 , textX = 45,  name = "computer_8" , text="Depo",       type="Station", signal="Create_Signal_10", offset= 6},
-    depo7       = { row = 6 , textX = 45,  name = "computer_7" , text="Depo",       type="Station", signal="Create_Signal_11", offset= 6},
-    depo8       = { row = 5 , textX = 45,  name = "computer_6" , text="Depo",       type="Station", signal="Create_Signal_12", offset= 6},
-    depo9       = { row = 4 , textX = 45,  name = "computer_5" , text="Depo",       type="Station", signal="Create_Signal_13", offset= 6},
-    depo10      = { row = 3 , textX = 45,  name = "computer_4" , text="Depo",       type="Station", signal="Create_Signal_14", offset= 6},
-    depo11      = { row = 2 , textX = 45,  name = "computer_3" , text="Depo",       type="Station", signal="Create_Signal_15", offset= 6},
+    Checkpoint  = { row = 13, textX = 40,  name = "computer_14", text="Checkpoint", type="Station", signal="Create_Signal_4", offset= 12},
+    depo1       = { row = 12, textX = 46,  name = "computer_13", text="Depo",       type="Station", signal="Create_Signal_5", offset= 6},
+    depo2       = { row = 11, textX = 46,  name = "computer_12", text="Depo",       type="Station", signal="Create_Signal_6", offset= 6},
+    depo3       = { row = 10, textX = 46,  name = "computer_11", text="Depo",       type="Station", signal="Create_Signal_7", offset= 6},
+    depo4       = { row = 9 , textX = 46,  name = "computer_10", text="Depo",       type="Station", signal="Create_Signal_8", offset= 6},
+    depo5       = { row = 8 , textX = 46,  name = "computer_9" , text="Depo",       type="Station", signal="Create_Signal_9", offset= 6},
+    depo6       = { row = 7 , textX = 46,  name = "computer_8" , text="Depo",       type="Station", signal="Create_Signal_10", offset= 6},
+    depo7       = { row = 6 , textX = 46,  name = "computer_7" , text="Depo",       type="Station", signal="Create_Signal_11", offset= 6},
+    depo8       = { row = 5 , textX = 46,  name = "computer_6" , text="Depo",       type="Station", signal="Create_Signal_12", offset= 6},
+    depo9       = { row = 4 , textX = 46,  name = "computer_5" , text="Depo",       type="Station", signal="Create_Signal_13", offset= 6},
+    depo10      = { row = 3 , textX = 46,  name = "computer_4" , text="Depo",       type="Station", signal="Create_Signal_14", offset= 6},
+    depo11      = { row = 2 , textX = 46,  name = "computer_3" , text="Depo",       type="Station", signal="Create_Signal_15", offset= 6},
     -- Signals
     entry1      = { row = 21, textX = 6,   name = "computer_51", text=" ", type="signal", signal="Create_Signal_18"},
     entry2      = { row = 16, textX = 10,  name = "computer_46", text=" ", type="signal", signal="top"},
@@ -79,7 +79,7 @@ local function drawPlan()
     mon.setCursorPos(1,13)
     mon.write("         |/__[ ]______________________<Checkpoint>[ ]____\\|   ")
     mon.setCursorPos(1,14)
-    mon.write("         |                                                | ")
+    mon.write("         |/                                              \\| ")
     mon.setCursorPos(1,15)
     mon.write("         |                                                | ")
     mon.setCursorPos(1,16)
@@ -87,7 +87,7 @@ local function drawPlan()
     mon.setCursorPos(1,17)
     mon.write("         |                                  _________[ ]__|___[ ]_____  ")
     mon.setCursorPos(1,18)
-    mon.write("         |                                 /              |              <---> Base                        ")
+    mon.write("         |                                 /              |          <---> Base                        ")
     mon.setCursorPos(1,19)
     mon.write(" ________|\\___[ ]_________________________/       ___[ ]___\\__[ ]_____  ")
     mon.setCursorPos(1,20)
@@ -99,14 +99,14 @@ local function drawPlan()
 
 end
 
-local function drawNode(node, color)
+local function drawNode(node, color, stationColor)
     mon.setCursorPos(node.textX, node.row)
     if node.type == "signal" then
         mon.setBackgroundColor(color)
         mon.write(node.text)
         mon.setBackgroundColor(colors.black)
     else -- type == station
-        mon.setTextColor(color)
+        mon.setTextColor(stationColor)
         mon.write(node.text)
         mon.setTextColor(colors.white)
         mon.setCursorPos(node.textX + node.offset, node.row)
@@ -153,7 +153,11 @@ while true do
                 if message.signal.state == "RED" then
                     color = colors.red
                 end
-                drawNode(node, color)
+                local stationColor =  colors.green
+                if message.station.trainPresent then
+                    stationColor = corlors.red
+                end
+                drawNode(node, color, stationColor)
             end
         end
     end
