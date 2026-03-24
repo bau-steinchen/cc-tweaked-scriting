@@ -23,8 +23,11 @@ end
 
 -- check if chain signal
 if chain == "true" then
-    signal.setSignalType("CROSS_SIGNAL")
+    if signal.getSignalType() == "ENTRY_SIGNAL" then
+        signal.cycleSignalType()
+    end
 end
+
 
 local modem = peripheral.wrap("bottom")
 rednet.open(peripheral.getName(modem))

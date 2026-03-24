@@ -25,26 +25,26 @@ local Nodes = {
     depo11      = { row = 2 , textX = 45,  name = "computer_3" , text="Depo",       type="Station", signal="Create_Signal_15", offset= 6},
     -- Signals
     entry1      = { row = 21, textX = 6,   name = "computer_51", text=" ", type="signal", signal="Create_Signal_18"},
-    entry2      = { row = 16, textX = 9,   name = "computer_46", text=" ", type="signal", signal="top"},
+    entry2      = { row = 16, textX = 10,  name = "computer_46", text=" ", type="signal", signal="top"},
     entry3      = { row = 19, textX = 16,  name = "computer_47", text=" ", type="signal", signal="Create_Signal_3"},
-    entry4      = { row = 13, textX = 14,  name = "computer_20", text=" ", type="signal", signal="top"},
-    entry5      = { row = 12, textX = 14,  name = "computer_21", text=" ", type="signal", signal="top"},
-    entry6      = { row = 11, textX = 14,  name = "computer_22", text=" ", type="signal", signal="top"},
-    entry7      = { row = 10, textX = 14,  name = "computer_23", text=" ", type="signal", signal="top"},
-    entry8      = { row = 9 , textX = 14,  name = "computer_24", text=" ", type="signal", signal="top"},
-    entry9      = { row = 8 , textX = 14,  name = "computer_25", text=" ", type="signal", signal="top"},
-    entry10     = { row = 7 , textX = 14,  name = "computer_26", text=" ", type="signal", signal="top"},
-    entry11     = { row = 6 , textX = 14,  name = "computer_27", text=" ", type="signal", signal="top"},
-    entry12     = { row = 5 , textX = 14,  name = "computer_28", text=" ", type="signal", signal="top"},
-    entry13     = { row = 4 , textX = 14,  name = "computer_29", text=" ", type="signal", signal="top"},
-    entry14     = { row = 3 , textX = 14,  name = "computer_30", text=" ", type="signal", signal="top"},
-    entry15     = { row = 2 , textX = 14,  name = "computer_31", text=" ", type="signal", signal="top"},
-    entry16     = { row = 16, textX = 58,  name = "computer_17", text=" ", type="signal", signal="top"},
-    entry17     = { row = 17, textX = 63,  name = "computer_18", text=" ", type="signal", signal="top"},
-    entry18     = { row = 19, textX = 54,  name = "computer_19", text=" ", type="signal", signal="Create_Signal_"},
-    entry19     = { row = 17, textX = 54,  name = "computer_", text=" ", type="signal", signal="Create_Signal_"},
-    entry20     = { row = 19, textX = 63,  name = "computer_", text=" ", type="signal", signal="Create_Signal_"},
-    entry21     = { row = 2 , textX = 14,  name = "computer_", text=" ", type="signal", signal="top"},
+    entry4      = { row = 13, textX = 15,  name = "computer_20", text=" ", type="signal", signal="top"},
+    entry5      = { row = 12, textX = 15,  name = "computer_21", text=" ", type="signal", signal="top"},
+    entry6      = { row = 11, textX = 15,  name = "computer_22", text=" ", type="signal", signal="top"},
+    entry7      = { row = 10, textX = 15,  name = "computer_23", text=" ", type="signal", signal="top"},
+    entry8      = { row = 9 , textX = 15,  name = "computer_24", text=" ", type="signal", signal="top"},
+    entry9      = { row = 8 , textX = 15,  name = "computer_25", text=" ", type="signal", signal="top"},
+    entry10     = { row = 7 , textX = 15,  name = "computer_26", text=" ", type="signal", signal="top"},
+    entry11     = { row = 6 , textX = 15,  name = "computer_27", text=" ", type="signal", signal="top"},
+    entry12     = { row = 5 , textX = 15,  name = "computer_28", text=" ", type="signal", signal="top"},
+    entry13     = { row = 4 , textX = 15,  name = "computer_29", text=" ", type="signal", signal="top"},
+    entry14     = { row = 3 , textX = 15,  name = "computer_30", text=" ", type="signal", signal="top"},
+    entry15     = { row = 2 , textX = 15,  name = "computer_31", text=" ", type="signal", signal="top"},
+    entry16     = { row = 16, textX = 59,  name = "computer_17", text=" ", type="signal", signal="top"},
+    entry17     = { row = 17, textX = 64,  name = "computer_18", text=" ", type="signal", signal="top"},
+    entry18     = { row = 19, textX = 56,  name = "computer_19", text=" ", type="signal", signal="Create_Signal_17"},
+    entry19     = { row = 17, textX = 54,  name = "computer_52", text=" ", type="signal", signal="top"},
+    entry20     = { row = 19, textX = 63,  name = "computer_53", text=" ", type="signal", signal="Create_Signal_19"},
+    entry21     = { row = 2 , textX = 14,  name = "computer_55", text=" ", type="signal", signal="top"},
 }
 
 -------------------------------------------------
@@ -148,7 +148,7 @@ while true do
         if type(message) == "table" then
 
             if node then
-                print(textutils.serialize(node.name))
+                -- print(textutils.serialize(node.name))
                 local color = colors.green
                 if message.signal.state == "RED" then
                     color = colors.red
