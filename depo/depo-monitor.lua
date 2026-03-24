@@ -41,10 +41,10 @@ local Nodes = {
     entry15     = { row = 2 , textX = 15,  name = "computer_31", text=" ", type="signal", signal="top"},
     entry16     = { row = 16, textX = 59,  name = "computer_17", text=" ", type="signal", signal="top"},
     entry17     = { row = 17, textX = 64,  name = "computer_18", text=" ", type="signal", signal="top"},
-    entry18     = { row = 19, textX = 56,  name = "computer_19", text=" ", type="signal", signal="Create_Signal_17"},
-    entry19     = { row = 17, textX = 54,  name = "computer_52", text=" ", type="signal", signal="top"},
-    entry20     = { row = 19, textX = 63,  name = "computer_53", text=" ", type="signal", signal="Create_Signal_19"},
-    entry21     = { row = 2 , textX = 14,  name = "computer_55", text=" ", type="signal", signal="top"},
+    entry18     = { row = 19, textX = 55,  name = "computer_19", text=" ", type="signal", signal="Create_Signal_17"},
+    entry19     = { row = 17, textX = 55,  name = "computer_52", text=" ", type="signal", signal="top"},
+    entry20     = { row = 19, textX = 64,  name = "computer_53", text=" ", type="signal", signal="Create_Signal_19"},
+    entry21     = { row = 2 , textX = 66,  name = "computer_55", text=" ", type="signal", signal="top"},
 }
 
 -------------------------------------------------
