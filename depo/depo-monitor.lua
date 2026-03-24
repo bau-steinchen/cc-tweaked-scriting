@@ -21,8 +21,8 @@ local Nodes = {
     depo7       = { row = 6 , textX = 46,  name = "computer_7" , text="Depo",       type="Station", signal="Create_Signal_11", offset= 6},
     depo8       = { row = 5 , textX = 46,  name = "computer_6" , text="Depo",       type="Station", signal="Create_Signal_12", offset= 6},
     depo9       = { row = 4 , textX = 46,  name = "computer_5" , text="Depo",       type="Station", signal="Create_Signal_13", offset= 6},
-    depo10      = { row = 3 , textX = 46,  name = "computer_4" , text="Depo",       type="Station", signal="Create_Signal_14", offset= 6},
-    depo11      = { row = 2 , textX = 46,  name = "computer_3" , text="Depo",       type="Station", signal="Create_Signal_15", offset= 6},
+    depo10      = { row = 3 , textX = 46,  name = "computer_3" , text="Depo",       type="Station", signal="Create_Signal_14", offset= 6},
+    depo11      = { row = 2 , textX = 46,  name = "computer_4" , text="Depo",       type="Station", signal="Create_Signal_15", offset= 6},
     -- Signals
     entry1      = { row = 21, textX = 6,   name = "computer_51", text=" ", type="signal", signal="Create_Signal_18"},
     entry2      = { row = 16, textX = 10,  name = "computer_46", text=" ", type="signal", signal="top"},
@@ -148,14 +148,18 @@ while true do
         if type(message) == "table" then
 
             if node then
-                -- print(textutils.serialize(node.name))
+                print(textutils.serialize(node.station))
                 local color = colors.green
                 if message.signal.state == "RED" then
                     color = colors.red
                 end
                 local stationColor =  colors.green
-                if message.station.trainPresent then
-                    stationColor = corlors.red
+                if message.station then
+                    if message.station.trainPresent then
+                        stationColor = colors.red
+                    else
+                        print("Can't find station state: " .. tostring(message.station))
+                    end
                 end
                 drawNode(node, color, stationColor)
             end
