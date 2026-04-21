@@ -58,7 +58,7 @@ local function addMessage(text)
     end
 end
 
-local funtion OutputStation(receiver)
+local function OutputStation(receiver)
     print("Output Station Reached")
     sleep(1)
     rednet.broadcast({
@@ -74,7 +74,7 @@ local funtion OutputStation(receiver)
         command = "send"
         
     }) 
-    addMessage("Broadcast send to computer 77")
+    addMessage("Broadcast send to " .. receiver)
 end
 
 local function handleCommand(msg)
@@ -190,7 +190,7 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_59",
-            command = "couple"
+            command = "send"
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -205,7 +205,7 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_59",
-            command = "couple"
+            command = "send"
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -222,7 +222,7 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_59",
-            command = "couple"
+            command = "send"
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -237,7 +237,7 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_59",
-            command = "couple"
+            command = "send"
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -252,7 +252,7 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_59",
-            command = "couple"
+            command = "send"
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -271,7 +271,7 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_56",
-            command = "couple"
+            command = "send"
             
         })
     end
@@ -299,7 +299,7 @@ local function handleCommand(msg)
 
     -- 14. call loco when shunting loco parked
     if current_state == "call_loco" and msg.sender == "computer_71" then
-        current_state == "loco_pickup"
+        current_state = "loco_pickup"
         sleep(1)
         rednet.broadcast({
             sender = sender,
@@ -361,7 +361,7 @@ while running do
         local timerId = p1
         if timerId == newTrain then
             addMessage("Timer newTrain with " .. tostring(stopped))
-            if stopped ~= true and current_state ~= "idle" then
+            if stopped ~= true and current_state == "idle" then
                 redstone.setAnalogOutput("back", 15)
                 newTrain = os.startTimer(newTrainTimeout)
                 activePulseTimer = os.startTimer(1)

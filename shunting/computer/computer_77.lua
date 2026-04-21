@@ -118,7 +118,7 @@ local function handleMessage(senderId, message, protocol)
     dump(message)
 
     if message.command == "couple" then
-        delayTimer = os.startTimer(message.sleep) 
+        delayTimer = os.startTimer(1) 
     end
 end
 

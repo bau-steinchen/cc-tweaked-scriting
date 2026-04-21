@@ -114,12 +114,10 @@ local function handleMessage(senderId, message, protocol)
     if message.receiver and message.receiver ~= NODE_NAME then return end
 
     lastMessage = message
-    print("Empfangen von ID: " .. tostring(senderId))
-    dump(message)
+    -- print("Empfangen von ID: " .. tostring(senderId))
+    -- dump(message)
 
-    if message.command == "send" then
-        delayTimer = os.startTimer(message.sleep) 
-    end
+    delayTimer = os.startTimer(1) 
 end
 
 readStation()

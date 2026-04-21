@@ -114,17 +114,15 @@ local function handleMessage(senderId, message, protocol)
     if message.receiver and message.receiver ~= NODE_NAME then return end
 
     lastMessage = message
-    print("Empfangen von ID: " .. tostring(senderId))
-    dump(message)
-
-    if message.command == "send" then
-        delayTimer = os.startTimer(message.sleep) 
-    end
+    -- print("Empfangen von ID: " .. tostring(senderId))
+    -- dump(message)
+    delayTimer = os.startTimer(1) 
 end
 
 readStation()
 redraw(lastData)
 pollTimer = os.startTimer(POLL_INTERVAL)
+stopDropoff()
 
 while true do
     local event, p1, p2, p3 = os.pullEvent()
@@ -132,6 +130,7 @@ while true do
     if event == "rednet_message" then
         local senderId, message, protocol = p1, p2, p3
         handleMessage(senderId, message, protocol)
+        redraw(lastData)
 
     elseif event == "timer" then
         local timerId = p1
@@ -147,5 +146,6 @@ while true do
             print("Command ausgeführt: send")
             delayTimer = nil
         end
+        redraw(lastData)
     end
 end
