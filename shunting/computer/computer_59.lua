@@ -1,6 +1,6 @@
 -- Single output node: reagiert nur auf command = "dropoff"
 
-local NODE_NAME = "computer_58"
+local NODE_NAME = "computer_59"
 local MODEM_SIDE = "bottom"
 local DROPOFF_SIDE = "right"
 local PULSE_DURATION = 1.0
@@ -11,10 +11,11 @@ rednet.open(MODEM_SIDE)
 
 local activePulseTimer = nil
 local pollTimer = nil
+local delayTimer = nil
 local lastData = { sender = NODE_NAME, station = { trainPresent = false } }
 local lastMessage = { sender = "none" }
 
---local station = peripheral.wrap("top")
+local station = peripheral.wrap("top")
 
 local function tablesEqual(t1, t2)
     if type(t1) ~= type(t2) then return false end
@@ -68,7 +69,7 @@ end
 local function redraw(currentData)
     term.clear()
     term.setCursorPos(1, 1)
-    print("=== DROPOFF NODE ===")
+    print("=== RETURN NODE ===")
     print("Node: " .. NODE_NAME)
     print("Train Present: " .. tostring(currentData.station.trainPresent))
     print("Last sender: " .. tostring(lastMessage.sender))
@@ -89,15 +90,15 @@ local function stopDropoff()
 end
 
 local function readStation()
-    -- local success, trainPresent = pcall(function()
-    --     --return station.isTrainPresent()
-    --     return redstone.getInput("back")
-    -- end)
-
+    local success, trainPresent = pcall(function()
+        return station.isTrainPresent()
+        -- return redstone.getInput("back")
+    end)
+        
     local currentData = {
         sender = NODE_NAME,
-        --station = { trainPresent = success and trainPresent or false }
-        station = { trainPresent = redstone.getInput("back")}
+        station = { trainPresent = success and trainPresent or false }
+        -- station = { trainPresent = redstone.getInput("back")}
     }
 
     if not tablesEqual(lastData, currentData) then
@@ -110,18 +111,14 @@ end
 local function handleMessage(senderId, message, protocol)
     if type(message) ~= "table" then return end
 
+    if message.receiver and message.receiver ~= NODE_NAME then return end
+
     lastMessage = message
     print("Empfangen von ID: " .. tostring(senderId))
     dump(message)
 
-    if message.receiver and message.receiver ~= NODE_NAME then return end
-
-    if message.command == "dropoff" then
-        if message.sleep then
-            os.startTimer(message.sleep)  -- ✅ Non-blocking
-        end
-        pulseDropoff()
-        print("Command ausgeführt: dropoff")
+    if message.command == "send" then
+        delayTimer = os.startTimer(message.sleep) 
     end
 end
 
@@ -145,6 +142,10 @@ while true do
         elseif pollTimer and timerId == pollTimer then
             readStation()
             pollTimer = os.startTimer(POLL_INTERVAL)
+        elseif delayTimer and timerId == delayTimer then
+            pulseDropoff()
+            print("Command ausgeführt: send")
+            delayTimer = nil
         end
     end
 end

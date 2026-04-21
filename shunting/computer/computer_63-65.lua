@@ -1,20 +1,18 @@
 -- Coupler Node mit Redstone-Station-Inputs + command-Steuerung
 
-local NODE_NAME = "computer_60"
+local NODE_NAME = "computer_63"
 local MODEM_SIDE = "bottom"
 
 -- Outputs
-local COUPLE_SIDE = "left"
-local PICKUP_SEND_SIDE = "top"
-local DROPOFF_SEND_SIDE = "top"
+local COUPLE_SIDE = "back"
+local SEND_SIDE = "front"
 
 -- Inputs
-local PICKUP_RS_SIDE = "right"
-local DROPOFF_RS_SIDE = "back"
+local STATION = "left"
+local STATION_SHORT = "right"
 
 local OUTPUT_PULSE_DURATION = 1.0
 local POLL_INTERVAL = 0.5
-local POST_COUPLE_COOLDOWN = 4.0
 
 local modem = peripheral.wrap(MODEM_SIDE)
 if not modem then
@@ -25,12 +23,11 @@ rednet.open(MODEM_SIDE)
 
 local lastData = {
     sender = NODE_NAME,
-    pickup = { trainPresent = false },
-    dropoff = { trainPresent = false }
+    station = { trainPresent = false },
+    station_short = { trainPresent = false }
 }
 
 local lastMessage = { sender = "none" }
-local suppressPollingUntil = 0
 local pollTimer = nil
 
 local activePulseTimers = {}
@@ -89,11 +86,10 @@ local function redraw(currentData)
     term.setCursorPos(1, 1)
     print("=== COUPLER NODE ===")
     print("Node: " .. NODE_NAME)
-    print("Pickup in  (" .. PICKUP_RS_SIDE .. "): " .. tostring(currentData.pickup.trainPresent))
-    print("Dropoff in (" .. DROPOFF_RS_SIDE .. "): " .. tostring(currentData.dropoff.trainPresent))
+    print("Pickup in  (" .. STATION .. "): " .. tostring(currentData.station.trainPresent))
+    print("Dropoff in (" .. STATION_SHORT .. "): " .. tostring(currentData.station_short.trainPresent))
     print("Last msg sender: " .. tostring(lastMessage.sender))
     print("Last command: " .. tostring(lastMessage.command))
-    print("Cooldown: " .. tostring(os.clock() < suppressPollingUntil))
 end
 
 local function pulseSide(side, duration)
@@ -103,17 +99,13 @@ local function pulseSide(side, duration)
 end
 
 local function readRedstoneStations()
-    if os.clock() < suppressPollingUntil then
-        return
-    end
-
     local currentData = {
         sender = NODE_NAME,
-        pickup = {
-            trainPresent = rs.getInput(PICKUP_RS_SIDE)
+        station = {
+            trainPresent = rs.getInput(STATION)
         },
-        dropoff = {
-            trainPresent = rs.getInput(DROPOFF_RS_SIDE)
+        station_short = {
+            trainPresent = rs.getInput(STATION_SHORT)
         }
     }
 
@@ -130,17 +122,11 @@ local function handleCommand(message)
     if command == "couple" then
         
         pulseSide(COUPLE_SIDE, OUTPUT_PULSE_DURATION)
-        suppressPollingUntil = os.clock() + POST_COUPLE_COOLDOWN
         print("Command ausgeführt: couple")
 
-    elseif command == "pickup" then
-        pulseSide(PICKUP_SEND_SIDE, OUTPUT_PULSE_DURATION)
-        print("Command ausgeführt: pickup")
-
-    elseif command == "dropoff" then
-        pulseSide(DROPOFF_SEND_SIDE, OUTPUT_PULSE_DURATION)
-        print("Command ausgeführt: dropoff")
-
+    elseif command == "send" then
+        pulseSide(SEND_SIDE, OUTPUT_PULSE_DURATION)
+        print("Command ausgeführt: send")
     else
         print("Unbekannter command: " .. tostring(command))
     end
@@ -159,10 +145,6 @@ local function handleMessage(senderId, message, protocol)
     print("Empfangen von ID: " .. tostring(senderId))
     dump(message)
 
-    if message.sleep and type(message.sleep) == "number" and message.sleep > 0 then
-        suppressPollingUntil = math.max(suppressPollingUntil, os.clock() + message.sleep)
-    end
-
     if message.command then
         handleCommand(message)
     end
@@ -177,6 +159,7 @@ while true do
     if event == "rednet_message" then
         local senderId, message, protocol = p1, p2, p3
         handleMessage(senderId, message, protocol)
+        redraw(lastData)
 
     elseif event == "timer" then
         local timerId = p1
@@ -190,8 +173,10 @@ while true do
             redstone.setAnalogOutput(side, 0)
             activePulseTimers[timerId] = nil
         end
+        redraw(lastData)
 
     elseif event == "redstone" then
         readRedstoneStations()
+        redraw(lastData)
     end
 end

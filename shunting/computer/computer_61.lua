@@ -1,16 +1,16 @@
 -- Coupler Node mit Redstone-Station-Inputs + command-Steuerung
 
-local NODE_NAME = "computer_60"
+local NODE_NAME = "computer_61"
 local MODEM_SIDE = "bottom"
 
 -- Outputs
-local COUPLE_SIDE = "left"
-local PICKUP_SEND_SIDE = "top"
-local DROPOFF_SEND_SIDE = "top"
+local COUPLE_SIDE = "right"
+local PICKUP_SEND_SIDE = "back"
+local DROPOFF_SEND_SIDE = "back"
 
 -- Inputs
-local PICKUP_RS_SIDE = "right"
-local DROPOFF_RS_SIDE = "back"
+local PICKUP_RS_SIDE = "left"
+local DROPOFF_RS_SIDE = "left"
 
 local OUTPUT_PULSE_DURATION = 1.0
 local POLL_INTERVAL = 0.5
