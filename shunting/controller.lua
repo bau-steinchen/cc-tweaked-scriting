@@ -10,7 +10,8 @@ end
 
 local running = true
 local stopped = false
-local states = {"idle", "loco_arrived", "loco_parked", "pickup_full", "move_full", "entry", "output1","output2","output3","pickup1","pickup2","pickup3", "move_empty", "empty_parked", "call_loco", "loco_pickup"}
+local locomotive = 2 -- 3 shunting locomotives 0, 1, 2 (left to right) Orange is default with 2
+local states = {"idle", "loco_arrived", "loco_parked", "pickup_full", "move_full", "entry", "output1","output2","output3","pickup1","pickup2","pickup3", "move_empty", "empty_parked", "loco_pickup"}
 
 local current_state = "idle"
 
@@ -23,6 +24,8 @@ local newTrainTimeout = 10
 local activePulseTimer = nil
 local messageHistory = {}
 local historyCounter = 10
+
+local sleepmode = false
 
 local function getStateIndex(current)
     for i, state in ipairs(states) do
@@ -71,7 +74,8 @@ local function OutputStation(receiver)
     rednet.broadcast({
         sender = sender,
         receiver = receiver,
-        command = "send"
+        command = "send",
+        state = current_state
         
     }) 
     addMessage("Broadcast send to " .. receiver)
@@ -94,14 +98,16 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_60",
-            command = "couple"
+            command = "couple",
+            state = current_state
             
         })
         sleep(2)
         rednet.broadcast({
             sender = sender,
-            receiver = "computer_60",
-            command = "dropoff"
+            receiver = "computer_58",
+            command = "dropoff",
+            state = current_state
             
         })
         
@@ -118,7 +124,8 @@ local function handleCommand(msg)
             sender = sender,
             sleep = 2,
             receiver = "computer_71",
-            command = "couple"
+            command = "couple",
+            state = current_state
             
         })
 
@@ -132,15 +139,23 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_61",
-            command = "couple"
+            command = "couple",
+            state = current_state
             
         })
         addMessage("Broadcast send to computer 61")
         sleep(2)
         rednet.broadcast({
             sender = sender,
+            receiver = "computer_60",
+            command = "dropoff",
+            state = current_state
+            
+        })rednet.broadcast({
+            sender = sender,
             receiver = "computer_61",
-            command = "dropoff"
+            command = "dropoff",
+            state = current_state
             
         })
         sleep(2)
@@ -154,7 +169,8 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_56",
-            command = "couple"
+            command = "couple",
+            state = current_state
             
         })
         addMessage("Broadcast send to computer 56")
@@ -164,18 +180,19 @@ local function handleCommand(msg)
     if current_state == "move_full" and msg.sender == "computer_77" then
         current_state = "entry"
         print("Entry Point Reached")
-        -- sleep(1)
-        -- rednet.broadcast({
-        --     sender = sender,
-        --     receiver = "computer_xx", --> Open gate 2
-        --     command = "couple"
+        sleep(1)
+        rednet.broadcast({
+            sender = sender,
+            receiver = "computer_79", --> Open gate 2
+            gate = "GATE2"
             
-        -- })
-        sleep(3)
+        })
+        sleep(2)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_77",
-            command = "couple"
+            command = "couple",
+            state = current_state
             
         }) 
         addMessage("Broadcast send to computer 77")
@@ -189,8 +206,22 @@ local function handleCommand(msg)
     if current_state == "output1" and msg.sender == "computer_59" then
         rednet.broadcast({
             sender = sender,
+            receiver = "computer_79", --> Close gate 2
+            gate = "GATE2"
+            
+        })
+        sleep(1)
+        rednet.broadcast({
+            sender = sender,
+            receiver = "computer_79", --> Open gate 3
+            gate = "GATE3"
+            
+        })
+        rednet.broadcast({
+            sender = sender,
             receiver = "computer_59",
-            command = "send"
+            command = "send",
+            state = current_state
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -204,8 +235,22 @@ local function handleCommand(msg)
     if current_state == "output2" and msg.sender == "computer_59" then
         rednet.broadcast({
             sender = sender,
+            receiver = "computer_79", --> Close gate 3
+            gate = "GATE3"
+            
+        })
+        sleep(1)
+        rednet.broadcast({
+            sender = sender,
+            receiver = "computer_79", --> Open gate 4
+            gate = "GATE4"
+            
+        })
+        rednet.broadcast({
+            sender = sender,
             receiver = "computer_59",
-            command = "send"
+            command = "send",
+            state = current_state
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -215,14 +260,27 @@ local function handleCommand(msg)
     if current_state == "output2" and msg.sender == "computer_65" then
         current_state = "output3"
         OutputStation("computer_65")
-        sleep(1)
+        sleep(3)
+        rednet.broadcast({
+            sender = sender,
+            receiver = "computer_79", --> Close gate 4
+            gate = "GATE4"
+            
+        })
     end
     if current_state == "output3" and msg.sender == "computer_78" then --> Empty event need to be defined 
         current_state = "pickup3"
         rednet.broadcast({
             sender = sender,
+            receiver = "computer_79", --> Open gate 4
+            gate = "GATE4"
+            
+        })
+        rednet.broadcast({
+            sender = sender,
             receiver = "computer_59",
-            command = "send"
+            command = "send",
+            state = current_state
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -236,8 +294,22 @@ local function handleCommand(msg)
     if current_state == "pickup2" and msg.sender == "computer_59" then
         rednet.broadcast({
             sender = sender,
+            receiver = "computer_79", --> Close gate 4
+            gate = "GATE4"
+            
+        })
+        sleep(1)
+        rednet.broadcast({
+            sender = sender,
+            receiver = "computer_79", --> Open gate 3
+            gate = "GATE3"
+            
+        })
+        rednet.broadcast({
+            sender = sender,
             receiver = "computer_59",
-            command = "send"
+            command = "send",
+            state = current_state
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -251,8 +323,22 @@ local function handleCommand(msg)
     if current_state == "pickup1" and msg.sender == "computer_59" then
         rednet.broadcast({
             sender = sender,
+            receiver = "computer_79", --> Close gate 3
+            gate = "GATE3"
+            
+        })
+        sleep(1)
+        rednet.broadcast({
+            sender = sender,
+            receiver = "computer_79", --> Open gate 2
+            gate = "GATE2"
+            
+        })
+        rednet.broadcast({
+            sender = sender,
             receiver = "computer_59",
-            command = "send"
+            command = "send",
+            state = current_state
             
         }) 
         addMessage("Broadcast send to computer 59")
@@ -262,6 +348,13 @@ local function handleCommand(msg)
     if current_state == "pickup1" and msg.sender == "computer_63" then
         current_state = "move_empty"
         OutputStation("computer_63")
+        sleep(3)
+        rednet.broadcast({
+            sender = sender,
+            receiver = "computer_79", --> Close gate 2
+            gate = "GATE2"
+            
+        })
     end
 
     -- 12. reverse point reached
@@ -271,7 +364,8 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_56",
-            command = "send"
+            command = "send",
+            state = current_state
             
         })
     end
@@ -284,53 +378,62 @@ local function handleCommand(msg)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_61",
-            command = "couple"
+            command = "couple",
+            state = current_state
             
         })
         sleep(2)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_61",
-            command = "dropoff"
+            command = "dropoff",
+            state = current_state
             
         })
-        addMessage("Broadcast send to computer 61")
-    end
-
-    -- 14. call loco when shunting loco parked
-    if current_state == "call_loco" and msg.sender == "computer_71" then
-        current_state = "loco_pickup"
-        sleep(1)
+        rednet.broadcast({
+            sender = sender,
+            receiver = "computer_60",
+            command = "dropoff",
+            state = current_state
+            
+        })
+        --addMessage("Broadcast send to computer 61")
+        sleep(2)
         rednet.broadcast({
             sender = sender,
             sleep = 2,
             receiver = "computer_57",
-            command = "couple"
+            command = "couple",
+            state = current_state
             
         })
+        current_state = "loco_pickup"
     end
 
-    -- 15. locomotive back
+    -- 14. locomotive back
     if current_state == "loco_pickup" and msg.sender == "computer_60" then
         sleep(1)
         -- couple on computer 60
         rednet.broadcast({
             sender = sender,
             receiver = "computer_60",
-            command = "couple"
+            command = "couple",
+            state = current_state
             
         })
         sleep(2)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_60",
-            command = "pickup"
+            command = "pickup",
+            state = current_state
             
         })
         rednet.broadcast({
             sender = sender,
             receiver = "computer_61",
-            command = "pickup"
+            command = "pickup",
+            state = current_state
             
         })
         sleep(2)
@@ -338,9 +441,13 @@ local function handleCommand(msg)
         addMessage("New State: idle")
         sleep(10)
         current_state = "idle"
+        math.randomseed(os.time())
+        locomotive = math.random(0, 2)
+        addMessage("New locomotive picked for next schedule: " .. locomotive)
         
         newTrain = os.startTimer(newTrainTimeout)
         addMessage("New call Timer: " .. newTrain)
+        print("Waiting for next locomotive")
     end
 end
 
@@ -360,16 +467,25 @@ while running do
         --print("Timer Event: " .. p1)
         local timerId = p1
         if timerId == newTrain then
-            addMessage("Timer newTrain with " .. tostring(stopped))
-            if stopped ~= true and current_state == "idle" then
-                redstone.setAnalogOutput("back", 15)
-                newTrain = os.startTimer(newTrainTimeout)
-                activePulseTimer = os.startTimer(1)
-                addMessage("New Pulse Timer: " .. activePulseTimer .. " and new call Timer: " .. newTrain)
+            if not redstone.getInput("top") then
+                sleepmode = false
+                --addMessage("Timer newTrain with " .. tostring(stopped))
+                if stopped ~= true and current_state == "idle" then
+                    redstone.setAnalogOutput("back", 15)
+                    newTrain = os.startTimer(newTrainTimeout)
+                    activePulseTimer = os.startTimer(1)
+                    --addMessage("New Pulse Timer: " .. activePulseTimer .. " and new call Timer: " .. newTrain)
+                else 
+                    stopped = false
+                    newTrain = nil
+                    addMessage("Stopped Value ist reset: " .. tostring(stopped))
+                end
             else 
-                stopped = false
-                newTrain = nil
-                addMessage("Stopped Value ist reset: " .. tostring(stopped))
+                if not sleepmode then
+                    addMessage("Sleep Mode activated! wait until next try")
+                    sleepmode = true
+                end
+                newTrain = os.startTimer(30)
             end
 
         elseif timerId == activePulseTimer then
@@ -379,11 +495,13 @@ while running do
         end
         draw()
     elseif event == "redstone" then
-        if stopped ~= true then 
-            -- stop newTrain timer
-            addMessage("Signal get new train on the way")
-            stopped = true
-            draw()
+        if redstone.getInput("right") then
+            if stopped ~= true then 
+                -- stop newTrain timer
+                addMessage("Signal get new train on the way")
+                stopped = true
+                draw()
+            end
         end
     end
 end
