@@ -1,6 +1,7 @@
 local signalName = "Create_Signal_4"
 local stationName = "travel trough"
 local sender = "computer_14"
+local track_index = 1
 
 -- Helper function: compare tables
 local function tablesEqual(t1, t2)
@@ -45,6 +46,7 @@ local lastData = {signal = {}, station = {}}
 while true do
     local currentData = {
         sender = sender,
+        track_index = track_index
         signal = {
             name = peripheral.getName(signal),
             state = signal.getState(),

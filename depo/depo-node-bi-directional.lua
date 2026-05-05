@@ -3,6 +3,15 @@
 local signalName = "Create_Signal_4"
 local stationName = "travel trough"
 local sender = "computer_14"
+local track_index = 0
+
+
+local MODEM_SIDE = "bottom"
+local DROPOFF_SIDE = "front"
+local PULSE_DURATION = 1.0
+local POLL_INTERVAL = 0.5
+local activePulseTimer = nil
+local pollTimer = nil
 
 -- Helper function: compare tables
 local function tablesEqual(t1, t2)
@@ -24,7 +33,7 @@ end
 local signal = peripheral.wrap(signalName)
 
 -- Station
-local station = peripheral.wrap("front")
+local station = peripheral.wrap(MODEM_SIDE)
 local ok, err = pcall(station.setStationName, stationName, station)
 if ok then
     print("Name set: " .. station.getStationName())
@@ -40,27 +49,37 @@ local lastData = {signal = {}, station = {}}
 local lastMessage = {sender="none"}
 local lastSend = "None"
 
-while true do
-    -- REDNET CHECK (non-blocking, 0.7 Sec. Timeout)
-    local id, message = rednet.receive(0.7)
-    if message then
-        if type(message) == "table" then
-            if message.receiver == sender or message.receiver == "ALL" then
-                lastMessage = message
-                print("Receivec message: " .. tostring(lastMessage.sender), tostring(lastMessage.signal))
-                -- and event for this computer occured
-                if message.signal == "RED" then
-                    signal.setForcedRed(true)
-                else 
-                    signal.setForcedRed(false)
-                end
-            end
-        end
-    end
+local function draw()
+    -- Optional: Terminal-Status
+    term.clear()
+    term.setCursorPos(1,1)
+    print("=== MONITOR ===")
+    print("Signal State: " .. tostring(currentData.signal.state) or "")
+    print("Station: " .. currentData.station.name or "")
+    print("Train: " .. tostring(currentData.station.trainPresent) or "" .. " (" .. currentData.station.trainName or "" .. ")")
+    print("Rednet letzte Msg: " .. tostring(lastMessage.sender))
+    print("Changes signal from: " .. lastSend)
+end
 
+local function pulseDropoff()
+    redstone.setAnalogOutput(DROPOFF_SIDE, 15)
+    activePulseTimer = os.startTimer(PULSE_DURATION)
+end
+
+local function stopDropoff()
+    redstone.setAnalogOutput(DROPOFF_SIDE, 0)
+    activePulseTimer = nil
+end
+
+local function readStation()
+    local success, trainPresent = pcall(function()
+        return station.isTrainPresent()
+    end)
+    
     -- -- SIGNAL CHECK (periodic)
     local currentData = {
         sender = sender,
+        track_index = track_index,
         signal = {
             name = peripheral.getName(signal),
             state = signal.getState(),
@@ -89,16 +108,51 @@ while true do
         rednet.broadcast(currentData)
         lastSend = tostring(lastData.signal.state)
         lastData = currentData
-
-        -- Optional: Terminal-Status
-        term.clear()
-        term.setCursorPos(1,1)
-        print("=== MONITOR ===")
-        print("Signal State: " .. tostring(currentData.signal.state))
-        print("Station: " .. currentData.station.name)
-        print("Train: " .. tostring(currentData.station.trainPresent) .. " (" .. currentData.station.trainName .. ")")
-        print("Rednet letzte Msg: " .. tostring(lastMessage.sender))
-        print("Changes signal from: " .. lastSend)
     end
-    sleep(0.1)
+end
+
+local function handleMessage(message)
+    if type(message) ~= "table" then return end
+
+    if message.receiver == sender or message.receiver == "ALL" then
+        lastMessage = message
+        print("Receive message: " .. tostring(lastMessage.sender), tostring(lastMessage.signal))
+        -- and event for this computer occured
+        if message.signal == "RED" then
+            signal.setForcedRed(true)
+        else 
+            signal.setForcedRed(false)
+        end
+    end
+
+    if message.track_index and message.track_index ~= track_index then return end
+    -- message has current track index sending train
+    pulseDropoff()
+
+end
+
+readStation()
+redraw()
+pollTimer = os.startTimer(POLL_INTERVAL)
+stopDropoff()
+
+while true do
+    local event, p1, p2, p3 = os.pullEvent()
+
+    if event == "rednet_message" then
+        local sender, message, protocol = p1, p2, p3
+        handleCommand(message)
+        draw()
+    elseif event == "timer" then 
+        local timerId = p1
+
+        if activePulseTimer and timerId == activePulseTimer then
+            stopDropoff()
+
+        elseif pollTimer and timerId == pollTimer then
+            readStation()
+            pollTimer = os.startTimer(POLL_INTERVAL)
+        end
+        draw()
+    end
 end
