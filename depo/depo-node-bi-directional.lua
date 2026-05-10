@@ -1,9 +1,9 @@
 -- Signal and station node with accepting broadcasts
 
-local signalName = "Create_Signal_4"
-local stationName = "travel trough"
-local sender = "computer_14"
-local track_index = 0
+local signalName = "Create_Signal_5"
+local stationName = "Depo"
+local sender = "computer_13"
+local track_index = 1
 
 
 local MODEM_SIDE = "bottom"
@@ -33,7 +33,7 @@ end
 local signal = peripheral.wrap(signalName)
 
 -- Station
-local station = peripheral.wrap(MODEM_SIDE)
+local station = peripheral.wrap(DROPOFF_SIDE)
 local ok, err = pcall(station.setStationName, stationName, station)
 if ok then
     print("Name set: " .. station.getStationName())
@@ -45,6 +45,7 @@ local modem = peripheral.wrap("bottom")
 rednet.open(peripheral.getName(modem))
 
 local lastData = {signal = {}, station = {}}
+local currentData = {signal = {}, station = {name="None", trainPresent = false}}
 
 local lastMessage = {sender="none"}
 local lastSend = "None"
@@ -77,7 +78,7 @@ local function readStation()
     end)
     
     -- -- SIGNAL CHECK (periodic)
-    local currentData = {
+    currentData = {
         sender = sender,
         track_index = track_index,
         signal = {
@@ -132,7 +133,7 @@ local function handleMessage(message)
 end
 
 readStation()
-redraw()
+draw()
 pollTimer = os.startTimer(POLL_INTERVAL)
 stopDropoff()
 
@@ -141,7 +142,7 @@ while true do
 
     if event == "rednet_message" then
         local sender, message, protocol = p1, p2, p3
-        handleCommand(message)
+        handleMessage(message)
         draw()
     elseif event == "timer" then 
         local timerId = p1

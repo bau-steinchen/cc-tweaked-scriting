@@ -1,13 +1,17 @@
--- Single output node: reagiert nur auf command = "dropoff"
-
+-- train node to find all available trains
 local NODE_NAME = "computer_80"
-local MODEM_SIDE = "bottom"
+local MODEM_SIDE = "top"
+local NOTIFY_OUTPUT = "bottom"
+
+local activePulseTimer = nil
+local PULSE_DURATION = 1.0
 
 local modem = peripheral.wrap(MODEM_SIDE)
 rednet.open(MODEM_SIDE)
 
-
-local trains = ["None", "None", "None", "None", "None", "None", "None", "None", "None", "None", "None"]
+local lastmsg = ""
+redstonemsg = ""
+local trains = {"None", "None", "None", "None", "None", "None", "None", "None", "None", "None", "None"}
 
 local function redraw()
     term.clear()
@@ -26,6 +30,8 @@ local function redraw()
     print("Depo  9: - " .. trains[9])
     print("Depo 10: - " .. trains[10])
     print("Depo 11: - " .. trains[11])
+    print("Last Message: " .. lastmsg)
+    print(redstonemsg)
 end
 
 local function sendNewTrain()
@@ -39,6 +45,7 @@ local function sendNewTrain()
     end
 
     if #available == 0 then
+        lastmsg = "No Train available doing nothing"
         return false -- no trains available 
     end
 
@@ -51,19 +58,32 @@ local function sendNewTrain()
         track_index = index,
         command = "send"
     })
+    lastmsg = "New Train from Track " .. index
+
+    -- sending redstone notify that new train is send 
+    redstone.setAnalogOutput(NOTIFY_OUTPUT, 15)
+    activePulseTimer = os.startTimer(PULSE_DURATION)
 end
 
-
+local function stopPulse()
+    redstone.setAnalogOutput(NOTIFY_OUTPUT, 0)
+    activePulseTimer = nil
+end
 
 local function handleMessage(message)
     if type(message) ~= "table" then return end
-    
+
+    if not message.track_index then return end
+    --lastmsg = "New Message from Track: " .. message.track_index
+
     if message.station then
-        if message.station.isTrainPresent then
+        if message.station.trainPresent then
             trains[message.track_index] = message.station.trainName or "No Name"
+            lastmsg = "New train at track: " .. message.track_index .. tostring(message.station.trainPresent)
         else 
             -- remove train from list when it leaves
             trains[message.track_index] = "None"
+            lastmsg = "Train left at track: " .. message.track_index .. tostring(message.station.trainPresent)
         end
     end
 end
@@ -80,8 +100,16 @@ while true do
         redraw()
 
     elseif event == "redstone" then
-        -- Notify from controller to send next train
-        sendNewTrain()
-        redraw()
+        if redstone.getInput("right") then -- high redstone pulse
+            -- Notify from controller to send next train
+            redstonemsg = "Redstone signal get - sending new train"
+            sendNewTrain()
+            redraw()
+        end
+    elseif event == "timer" then
+        if activePulseTimer and p1 == activePulseTimer then
+            stopPulse()
+            redraw()
+        end
     end
 end

@@ -11,7 +11,6 @@ rednet.open(MODEM_SIDE)
 
 local activePulseTimer = nil
 local pollTimer = nil
-local delayTimer = nil
 local lastData = { sender = NODE_NAME, station = { trainPresent = false } }
 local lastMessage = { sender = "none" }
 
@@ -36,34 +35,6 @@ local function tablesEqual(t1, t2)
     end
 
     return true
-end
-
-local function dump(value, indent, seen)
-    indent = indent or ""
-    seen = seen or {}
-
-    if type(value) ~= "table" then
-        print(indent .. tostring(value))
-        return
-    end
-
-    if seen[value] then
-        print(indent .. "<cycle>")
-        return
-    end
-    seen[value] = true
-
-    print(indent .. "{")
-    for k, v in pairs(value) do
-        io.write(indent .. "  [" .. tostring(k) .. "] = ")
-        if type(v) == "table" then
-            print()
-            dump(v, indent .. "  ", seen)
-        else
-            print(tostring(v))
-        end
-    end
-    print(indent .. "}")
 end
 
 local function redraw(currentData)
@@ -114,10 +85,11 @@ local function handleMessage(senderId, message, protocol)
     if message.receiver and message.receiver ~= NODE_NAME then return end
 
     lastMessage = message
-    -- print("Empfangen von ID: " .. tostring(senderId))
-    -- dump(message)
-
-    delayTimer = os.startTimer(1) 
+    if message.command == "couple" then 
+        sleep(1)
+        pulseDropoff()
+    end
+    
 end
 
 readStation()
@@ -141,10 +113,6 @@ while true do
         elseif pollTimer and timerId == pollTimer then
             readStation()
             pollTimer = os.startTimer(POLL_INTERVAL)
-        elseif delayTimer and timerId == delayTimer then
-            pulseDropoff()
-            print("Command ausgeführt: send")
-            delayTimer = nil
         end
         redraw(lastData)
     end

@@ -348,7 +348,7 @@ local function handleCommand(msg)
     if current_state == "pickup1" and msg.sender == "computer_63" then
         current_state = "move_empty"
         OutputStation("computer_63")
-        sleep(3)
+        sleep(5)
         rednet.broadcast({
             sender = sender,
             receiver = "computer_79", --> Close gate 2
@@ -473,7 +473,7 @@ while running do
                 if stopped ~= true and current_state == "idle" then
                     redstone.setAnalogOutput("back", 15)
                     newTrain = os.startTimer(newTrainTimeout)
-                    activePulseTimer = os.startTimer(1)
+                    activePulseTimer = os.startTimer(1
                     --addMessage("New Pulse Timer: " .. activePulseTimer .. " and new call Timer: " .. newTrain)
                 else 
                     stopped = false
