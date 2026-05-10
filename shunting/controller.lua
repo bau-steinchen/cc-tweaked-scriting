@@ -11,7 +11,7 @@ end
 local running = true
 local stopped = false
 local locomotive = 2 -- 3 shunting locomotives 0, 1, 2 (left to right) Orange is default with 2
-local states = {"idle", "loco_arrived", "loco_parked", "pickup_full", "move_full", "entry", "output1","output2","output3","pickup1","pickup2","pickup3", "move_empty", "empty_parked", "loco_pickup"}
+local states = {"idle", "loco_arrived", "loco_parked", "move_full", "entry", "output1","output2","output3","pickup1","pickup2","pickup3", "move_empty", "empty_parked", "loco_pickup"}
 
 local current_state = "idle"
 
@@ -133,7 +133,7 @@ local function handleCommand(msg)
 
     -- 3. locomotive parked
     if current_state == "loco_parked" and msg.sender == "computer_61" then
-        current_state = "pickup_full"
+        current_state = "move_full"
         -- locomotive stoped to pick up cargo
         sleep(1)
         rednet.broadcast({
@@ -162,20 +162,9 @@ local function handleCommand(msg)
     end
 
     -- 4. reverse point reached
-    if current_state == "pickup_full" and msg.sender == "computer_56" then
-        current_state = "move_full"
-        print("Reverse Point reached sending back")
-        sleep(1)
-        rednet.broadcast({
-            sender = sender,
-            receiver = "computer_56",
-            command = "couple",
-            state = current_state
-            
-        })
-        addMessage("Broadcast send to computer 56")
-    end
-    
+    -- erased because of computer distance problems
+    -- currently done with 1 second delay
+
     -- 5. entry
     if current_state == "move_full" and msg.sender == "computer_77" then
         current_state = "entry"
@@ -358,20 +347,10 @@ local function handleCommand(msg)
     end
 
     -- 12. reverse point reached
-    if current_state == "move_empty" and msg.sender == "computer_56" then --> arrived turn 
-        current_state = "empty_parked"
-        sleep(1)
-        rednet.broadcast({
-            sender = sender,
-            receiver = "computer_56",
-            command = "send",
-            state = current_state
-            
-        })
-    end
+    -- see explanation for section 4
 
     -- 13. empty train parked
-    if current_state == "empty_parked" and msg.sender == "computer_60" then --> empty waggons parked
+    if current_state == "move_empty" and msg.sender == "computer_60" then --> empty waggons parked
         current_state = "call_loco"
         addMessage("Broadcast send to computer 61")
         sleep(2)
@@ -473,7 +452,7 @@ while running do
                 if stopped ~= true and current_state == "idle" then
                     redstone.setAnalogOutput("back", 15)
                     newTrain = os.startTimer(newTrainTimeout)
-                    activePulseTimer = os.startTimer(1
+                    activePulseTimer = os.startTimer(1)
                     --addMessage("New Pulse Timer: " .. activePulseTimer .. " and new call Timer: " .. newTrain)
                 else 
                     stopped = false

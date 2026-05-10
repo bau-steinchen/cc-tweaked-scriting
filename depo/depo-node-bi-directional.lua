@@ -89,9 +89,6 @@ local function readStation()
         station = {
             name = station.getStationName(),
             trainPresent = station.isTrainPresent(),
-            trainImminent = station.isTrainImminent(),
-            trainEnroute = station.isTrainEnroute(),
-            assemblyMode = station.isInAssemblyMode(),
             trainName = station.isTrainPresent() and station.getTrainName() or "None"
         }
     }
@@ -126,9 +123,9 @@ local function handleMessage(message)
         end
     end
 
-    if message.track_index and message.track_index ~= track_index then return end
-    -- message has current track index sending train
-    pulseDropoff()
+    if message.track_index == track_index and message.sender == "computer_80" then
+        pulseDropoff()
+    end
 
 end
 

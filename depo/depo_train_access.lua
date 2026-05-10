@@ -56,7 +56,7 @@ local function sendNewTrain()
     rednet.broadcast({
         sender = sender,
         track_index = index,
-        command = "send"
+        command = "SEND"
     })
     lastmsg = "New Train from Track " .. index
 
@@ -83,7 +83,7 @@ local function handleMessage(message)
         else 
             -- remove train from list when it leaves
             trains[message.track_index] = "None"
-            lastmsg = "Train left at track: " .. message.track_index .. tostring(message.station.trainPresent)
+            --lastmsg = "Train left at track: " .. message.track_index .. tostring(message.station.trainPresent)
         end
     end
 end
