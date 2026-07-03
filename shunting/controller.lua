@@ -23,7 +23,7 @@ local newTrain = nil   -- Call new Train timer
 local newTrainTimeout = 10
 local activePulseTimer = nil
 local messageHistory = {}
-local historyCounter = 10
+local historyCounter = 20
 
 local sleepmode = false
 
@@ -55,6 +55,7 @@ local function draw()
 end
 
 local function addMessage(text) 
+    text = string.format("%-40s", current_state) .. " | " .. text
     table.insert(messageHistory, tostring(text))
     if #messageHistory > historyCounter then
         table.remove(messageHistory, 1)
