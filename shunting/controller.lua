@@ -351,8 +351,7 @@ local function handleCommand(msg)
 
     -- 13. empty train parked
     if current_state == "move_empty" and msg.sender == "computer_60" then --> empty waggons parked
-        current_state = "call_loco"
-        addMessage("Broadcast send to computer 61")
+        addMessage("Couple on computer 61")
         sleep(2)
         rednet.broadcast({
             sender = sender,
@@ -362,6 +361,7 @@ local function handleCommand(msg)
             
         })
         sleep(2)
+        addMessage("Start Train on computer 61")
         rednet.broadcast({
             sender = sender,
             receiver = "computer_61",
@@ -369,6 +369,7 @@ local function handleCommand(msg)
             state = current_state
             
         })
+        addMessage("Start Train on computer 60")
         rednet.broadcast({
             sender = sender,
             receiver = "computer_60",
@@ -378,6 +379,7 @@ local function handleCommand(msg)
         })
         --addMessage("Broadcast send to computer 61")
         sleep(2)
+        addMessage("Start Train on computer 57")
         rednet.broadcast({
             sender = sender,
             sleep = 2,
@@ -393,6 +395,7 @@ local function handleCommand(msg)
     if current_state == "loco_pickup" and msg.sender == "computer_60" then
         sleep(1)
         -- couple on computer 60
+        addMessage("Couple on computer 60")
         rednet.broadcast({
             sender = sender,
             receiver = "computer_60",
@@ -401,6 +404,7 @@ local function handleCommand(msg)
             
         })
         sleep(2)
+        addMessage("Start Train on computer 60")
         rednet.broadcast({
             sender = sender,
             receiver = "computer_60",
@@ -408,6 +412,7 @@ local function handleCommand(msg)
             state = current_state
             
         })
+        addMessage("Also Start Train on computer 61")
         rednet.broadcast({
             sender = sender,
             receiver = "computer_61",
@@ -416,7 +421,6 @@ local function handleCommand(msg)
             
         })
         sleep(2)
-        addMessage("Broadcast send to computer 60")
         addMessage("New State: idle")
         sleep(10)
         current_state = "idle"
